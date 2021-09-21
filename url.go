@@ -946,8 +946,10 @@ func parseQuery(m Values, query string) (err error) {
 		if key == "" {
 			continue
 		}
+
 		value := ""
-		if i := strings.Index(key, "="); i >= 0 {
+		i := strings.Index(key, "=")
+		if i >= 0 {
 			key, value = key[:i], key[i+1:]
 		}
 		key, err1 := QueryUnescape(key)
@@ -955,6 +957,11 @@ func parseQuery(m Values, query string) (err error) {
 			if err == nil {
 				err = err1
 			}
+			continue
+		}
+
+		if i == -1 { // No value, i.e. "?foo" without "=". Don't set an empty string for this.
+			m[key] = []string{}
 			continue
 		}
 		value, err1 = QueryUnescape(value)
@@ -984,6 +991,15 @@ func (v Values) Encode() string {
 	for _, k := range keys {
 		vs := v[k]
 		keyEscaped := QueryEscape(k)
+
+		if len(vs) == 0 {
+			if buf.Len() > 0 {
+				buf.WriteByte('&')
+			}
+			buf.WriteString(keyEscaped)
+			continue
+		}
+
 		for _, v := range vs {
 			if buf.Len() > 0 {
 				buf.WriteByte('&')

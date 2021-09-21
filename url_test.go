@@ -1576,6 +1576,16 @@ var requritests = []RequestURITest{
 		},
 		"/foo?",
 	},
+
+	{
+		&URL{
+			Scheme:   "http",
+			Host:     "example.com",
+			Path:     "/foo",
+			RawQuery: "a=&b=B&c",
+		},
+		"/foo?a=&b=B&c",
+	},
 }
 
 func TestRequestURI(t *testing.T) {
@@ -1593,7 +1603,7 @@ func TestParseFailure(t *testing.T) {
 	_, err := ParseQuery(url)
 	errStr := fmt.Sprint(err)
 	if !strings.Contains(errStr, "%gh") {
-		t.Errorf(`ParseQuery(%q) returned error %q, want something containing %q"`, url, errStr, "%gh")
+		t.Errorf(`ParseQuery(%q) returned error %q, want something containing %q`, url, errStr, "%gh")
 	}
 }
 
